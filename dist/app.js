@@ -160,19 +160,23 @@ var Danse = /** @class */ (function () {
     function Danse(scene) {
         this._scene = scene;
         this._t = 0;
+        // create a curve in space
         var pts = this.curve_points(this._t);
         var cat = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Curve3"].CreateCatmullRomSpline(pts, 60, true);
         this._cat = babylonjs__WEBPACK_IMPORTED_MODULE_0__["MeshBuilder"].CreateLines("cat_curve", { points: cat.getPoints(), updatable: true }, this._scene);
+        // attach a sphere to the curve, to make it slightly interesting
         this._sphere = babylonjs__WEBPACK_IMPORTED_MODULE_0__["MeshBuilder"].CreateSphere('sphere1', { segments: 16, diameter: 0.2 }, this._scene);
-        //this._sphere
         this._sphere.position = pts[2];
     }
     Danse.prototype.curve_points = function (t) {
+        // create 5 points for Catmull Rom curve
+        // each point rotate at different speed
+        // the shape of the curve is determined by t
         var r1 = 1.0;
         var r2 = 0.5;
         var r3 = 1.2;
         var r4 = 0.5;
-        var r5 = 1.2;
+        var r5 = 0.8;
         var a1 = t * 0.5;
         var a2 = t * 2.0;
         var a3 = t * 1.5;
@@ -187,6 +191,7 @@ var Danse = /** @class */ (function () {
         return pts;
     };
     Danse.prototype.update = function (dt) {
+        // update according to dt: time delta, i.e., the time has passed
         this._t += dt * 0.001;
         var pts = this.curve_points(this._t);
         var cat = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Curve3"].CreateCatmullRomSpline(pts, 60, true);

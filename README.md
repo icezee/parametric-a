@@ -1,5 +1,5 @@
 # babylonjs-ts-template
-start a babylonjs typescript project
+a TypeScript exercise in Babylon.js
 
-remake from
-https://github.com/hrkt/babylonjs-typescript-webpack-boilerplate
+animation case study to create a curve in space
+

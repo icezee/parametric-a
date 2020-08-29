@@ -1,5 +1,5 @@
-# babylonjs-ts-template
-a TypeScript exercise in Babylon.js
+# Danse2 (Babylon.js shape study)
+generate a shape in space
 
-animation case study to create a curve in space
+read more on medium @reddotblues
 

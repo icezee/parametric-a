@@ -1,5 +1,5 @@
 import * as BABYLON from 'babylonjs';
-import Danse from './Danse'
+import Danse2 from './Danse2'
 
 export default class MyScene {
     private _canvas: HTMLCanvasElement;
@@ -8,7 +8,7 @@ export default class MyScene {
     private _camera: BABYLON.ArcRotateCamera;
     private _light: BABYLON.Light;
 
-    private _danse: Danse
+    private _danse: Danse2
 
     constructor(canvasElement : string) {
         // Create canvas and engine.
@@ -20,14 +20,14 @@ export default class MyScene {
         this._scene = new BABYLON.Scene(this._engine);
         this._scene.clearColor = BABYLON.Color4.FromColor3(BABYLON.Color3.Random())
 
-        this._camera = new BABYLON.ArcRotateCamera("camera1", 0, 0, 0, new BABYLON.Vector3(0, 0, -0), this._scene);
-        this._camera.setPosition(new BABYLON.Vector3(0, 0, -8));
+        this._camera = new BABYLON.ArcRotateCamera("camera1", 0, 0, 0, new BABYLON.Vector3(0, 1, -0), this._scene);
+        this._camera.setPosition(new BABYLON.Vector3(0, 0, -6));
         this._camera.attachControl(this._canvas, true);
 
         // Create a basic light, aiming 0,1,0 - meaning, to the sky.
         this._light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), this._scene);
 
-        this._danse = new Danse(this._scene)
+        this._danse = new Danse2(this._scene)
     }
 
     doRender() : void {

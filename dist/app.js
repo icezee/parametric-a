@@ -144,10 +144,10 @@ module.exports = g;
 
 /***/ }),
 
-/***/ "./src/Danse.ts":
-/*!**********************!*\
-  !*** ./src/Danse.ts ***!
-  \**********************/
+/***/ "./src/Danse2.ts":
+/*!***********************!*\
+  !*** ./src/Danse2.ts ***!
+  \***********************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -156,51 +156,63 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var babylonjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! babylonjs */ "./node_modules/babylonjs/babylon.js");
 /* harmony import */ var babylonjs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(babylonjs__WEBPACK_IMPORTED_MODULE_0__);
 
-var Danse = /** @class */ (function () {
-    function Danse(scene) {
+var Danse2 = /** @class */ (function () {
+    function Danse2(scene) {
+        this._current = 0;
+        this._n = 20;
+        this._c = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Color3"].Random();
         this._scene = scene;
         this._t = 0;
-        // create a curve in space
-        var pts = this.curve_points(this._t);
-        var cat = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Curve3"].CreateCatmullRomSpline(pts, 60, true);
-        this._cat = babylonjs__WEBPACK_IMPORTED_MODULE_0__["MeshBuilder"].CreateLines("cat_curve", { points: cat.getPoints(), updatable: true }, this._scene);
-        // attach a sphere to the curve, to make it slightly interesting
-        this._sphere = babylonjs__WEBPACK_IMPORTED_MODULE_0__["MeshBuilder"].CreateSphere('sphere1', { segments: 16, diameter: 0.2 }, this._scene);
-        this._sphere.position = pts[2];
+        this._tubes = [];
+        for (var i = 0; i < this._n; i++) {
+            this.make_tube(this._t, false);
+        }
+        //console.log(this._ribs)
     }
-    Danse.prototype.curve_points = function (t) {
+    Danse2.prototype.curve_points = function (t) {
         // create 5 points for Catmull Rom curve
         // each point rotate at different speed
         // the shape of the curve is determined by t
-        var r1 = 1.0;
+        var r1 = 1.0 * Math.cos(t);
         var r2 = 0.5;
-        var r3 = 1.2;
+        var r3 = 1.2 * Math.sin(t) - 0.6;
         var r4 = 0.5;
-        var r5 = 0.8;
+        var r5 = 0.8 * Math.cos(t) - 0.4;
         var a1 = t * 0.5;
         var a2 = t * 2.0;
         var a3 = t * 1.5;
         var a4 = t * 2.5;
         var a5 = t * 0.5;
-        var p1 = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](r1 * Math.cos(a1), -0.5, r1 * Math.sin(a1));
+        var p1 = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](r1 * Math.cos(a1), 0.5 + 0.5 * Math.cos(t) - 0.25, r1 * Math.sin(a1));
         var p2 = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](r2 * Math.cos(a2), 1.0, r2 * Math.sin(a2));
         var p3 = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](r3 * Math.cos(a3), 1.8, r3 * Math.sin(a3));
         var p4 = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](r4 * Math.cos(a4), 2.5, r4 * Math.sin(a4));
-        var p5 = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](r5 * Math.cos(a5), 2.8, r5 * Math.sin(a5));
+        var p5 = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](r5 * Math.cos(a5), 2.8 + 0.5 * Math.cos(t) - 0.25, r5 * Math.sin(a5));
         var pts = [p1, p2, p3, p4, p5];
         return pts;
     };
-    Danse.prototype.update = function (dt) {
+    Danse2.prototype.update = function (dt) {
         // update according to dt: time delta, i.e., the time has passed
-        this._t += dt * 0.001;
-        var pts = this.curve_points(this._t);
-        var cat = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Curve3"].CreateCatmullRomSpline(pts, 60, true);
-        this._cat = babylonjs__WEBPACK_IMPORTED_MODULE_0__["MeshBuilder"].CreateLines("cat_curve", { points: cat.getPoints(), instance: this._cat });
-        this._sphere.position = pts[2];
+        this._t += dt * 0.002;
+        this.make_tube(this._t, true);
     };
-    return Danse;
+    Danse2.prototype.make_tube = function (t, update) {
+        var cat = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Curve3"].CreateCatmullRomSpline(this.curve_points(t), 10, false);
+        if (update) {
+            this._tubes[this._current] = babylonjs__WEBPACK_IMPORTED_MODULE_0__["MeshBuilder"].CreateTube("mesh", { path: cat.getPoints(), radius: 0.01,
+                instance: this._tubes[this._current % this._n] });
+        }
+        else {
+            this._tubes[this._current] = babylonjs__WEBPACK_IMPORTED_MODULE_0__["MeshBuilder"].CreateTube("mesh", { path: cat.getPoints(), radius: 0.01, updatable: true }, this._scene);
+            var m = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["StandardMaterial"]("mat", this._scene);
+            m.diffuseColor = this._c;
+            this._tubes[this._current].material = m;
+        }
+        this._current += 1;
+    };
+    return Danse2;
 }());
-/* harmony default export */ __webpack_exports__["default"] = (Danse);
+/* harmony default export */ __webpack_exports__["default"] = (Danse2);
 
 
 /***/ }),
@@ -239,7 +251,7 @@ window.addEventListener('DOMContentLoaded', function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var babylonjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! babylonjs */ "./node_modules/babylonjs/babylon.js");
 /* harmony import */ var babylonjs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(babylonjs__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _Danse__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Danse */ "./src/Danse.ts");
+/* harmony import */ var _Danse2__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Danse2 */ "./src/Danse2.ts");
 
 
 var MyScene = /** @class */ (function () {
@@ -251,12 +263,12 @@ var MyScene = /** @class */ (function () {
     MyScene.prototype.createScene = function () {
         this._scene = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Scene"](this._engine);
         this._scene.clearColor = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Color4"].FromColor3(babylonjs__WEBPACK_IMPORTED_MODULE_0__["Color3"].Random());
-        this._camera = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["ArcRotateCamera"]("camera1", 0, 0, 0, new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](0, 0, -0), this._scene);
-        this._camera.setPosition(new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](0, 0, -8));
+        this._camera = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["ArcRotateCamera"]("camera1", 0, 0, 0, new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](0, 1, -0), this._scene);
+        this._camera.setPosition(new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](0, 0, -6));
         this._camera.attachControl(this._canvas, true);
         // Create a basic light, aiming 0,1,0 - meaning, to the sky.
         this._light = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["HemisphericLight"]('light1', new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](0, 1, 0), this._scene);
-        this._danse = new _Danse__WEBPACK_IMPORTED_MODULE_1__["default"](this._scene);
+        this._danse = new _Danse2__WEBPACK_IMPORTED_MODULE_1__["default"](this._scene);
     };
     MyScene.prototype.doRender = function () {
         var _this = this;

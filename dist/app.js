@@ -225,15 +225,10 @@ var Danse2 = /** @class */ (function () {
             }
             var cat_1 = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Curve3"].CreateCatmullRomSpline(this.curve_points(t), 10, false);
             var path3d = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Path3D"](cat_1.getPoints());
-            //let path3d = new BABYLON.Path3D(this.curve_points(t))
-            // update the balls
             for (var i = 0; i < fft.length; i++) {
-                //console.log(fft[i])
-                //let d = Math.sqrt(fft[i]) * 0.5 
-                //console.log(d)
                 var p = path3d.getPointAt(i / fft.length);
                 this._balls[i].position = p;
-                //this._balls[i].scaling = new BABYLON.Vector3(d,d,d)
+                // make higher frequencies more visuable
                 this._partis[i].emitRate = fft[i] * 3 * i;
                 this._partis[i].maxSize = fft[i] * 0.1;
             }
@@ -286,11 +281,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var Music = /** @class */ (function () {
     function Music(scene) {
-        this._url = "//soundcloud.com/cmdigital/claude-debussy-arabesque-1";
-        this._music = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Sound"]("Music", 
-        //this._url,
-        //"//www.babylonjs.com/demos/AudioAnalyser/cosmosis.mp3",
-        "../music/m_lewin_arab.mp3", scene, null, { streaming: true, autoplay: true });
+        this._music = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Sound"]("Music", "../music/m_lewin_arab.mp3", scene, null, { streaming: true, autoplay: true });
         this._analyser = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Analyser"](scene);
         this._analyser.FFT_SIZE = 64;
         //this._analyser.SMOOTHING = 0

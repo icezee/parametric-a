@@ -3,13 +3,10 @@ import * as BABYLON from 'babylonjs'
 export default class Music {
     private _music: BABYLON.Sound
     private _analyser: BABYLON.Analyser
-    private _url: String = "//soundcloud.com/cmdigital/claude-debussy-arabesque-1"
 
     constructor(scene: BABYLON.Scene) {
         this._music = new BABYLON.Sound(
             "Music", 
-            //this._url,
-            //"//www.babylonjs.com/demos/AudioAnalyser/cosmosis.mp3",
             "../music/m_lewin_arab.mp3",
             scene, null, { streaming: true, autoplay: true })   
 

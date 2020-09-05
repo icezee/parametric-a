@@ -98,18 +98,12 @@ export default class Danse2 {
             let cat = BABYLON.Curve3.CreateCatmullRomSpline(
                 this.curve_points(t),10,false)
             let path3d = new BABYLON.Path3D(cat.getPoints())
-            //let path3d = new BABYLON.Path3D(this.curve_points(t))
 
-
-            // update the balls
             for(let i=0; i<fft.length; i++) {
-                //console.log(fft[i])
-                //let d = Math.sqrt(fft[i]) * 0.5 
-                //console.log(d)
                 let p = path3d.getPointAt( i/fft.length )
                 this._balls[i].position = p
-                //this._balls[i].scaling = new BABYLON.Vector3(d,d,d)
 
+                // make higher frequencies more visuable
                 this._partis[i].emitRate = fft[i] * 3 * i
                 this._partis[i].maxSize = fft[i] * 0.1 
 

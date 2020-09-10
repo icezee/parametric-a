@@ -160,7 +160,7 @@ var Danse2 = /** @class */ (function () {
     function Danse2(scene) {
         this._current = 0;
         this._n = 20;
-        this._c = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Color3"].Random();
+        this._c = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Color3"](0.3 + Math.random() * 0.5, 0.3 + Math.random() * 0.5, 0.3 + Math.random() * 0.5);
         this._scene = scene;
         this._t = 0;
         this._tubes = [];
@@ -170,15 +170,27 @@ var Danse2 = /** @class */ (function () {
         this._balls = [];
         this._partis = [];
     }
-    Danse2.prototype.curve_points = function (t) {
+    Danse2.prototype.curve_points = function (t, fft) {
         // create 5 points for Catmull Rom curve
         // each point rotate at different speed
         // the shape of the curve is determined by t
-        var r1 = 1.0 * Math.cos(t);
-        var r2 = 0.5;
-        var r3 = 1.2 * Math.sin(t) - 0.6;
-        var r4 = 0.5;
-        var r5 = 0.8 * Math.cos(t) - 0.4;
+        // use fft as the radii
+        // divide fft array into 6 sections, throw the highest away, as there is hardly sound there
+        var rs = [];
+        for (var i = 0; i < 6; i++) {
+            rs[i] = 0;
+            if (fft) {
+                for (var j = 0; j < fft.length / 6; j++) {
+                    rs[i] += fft[j];
+                }
+                rs[i] *= 0.05;
+            }
+        }
+        var r1 = rs[0] * Math.cos(t);
+        var r2 = rs[1];
+        var r3 = rs[2] * Math.sin(t) - rs[2] * 0.6;
+        var r4 = rs[3];
+        var r5 = rs[4] * Math.cos(t) - rs[4] * 0.4;
         var a1 = t * 0.5;
         var a2 = t * 2.0;
         var a3 = t * 1.5;
@@ -194,11 +206,14 @@ var Danse2 = /** @class */ (function () {
     };
     Danse2.prototype.update = function (dt, fft) {
         // update according to dt: time delta, i.e., the time has passed
-        this._t += dt * 0.0012;
+        this._t += dt * 0.00052;
+        if (fft) {
+            this._t += fft[10] * 0.01;
+        }
         this.make_tube(this._t, true, fft);
     };
     Danse2.prototype.make_tube = function (t, update, fft) {
-        var cat = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Curve3"].CreateCatmullRomSpline(this.curve_points(t), 10, true);
+        var cat = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Curve3"].CreateCatmullRomSpline(this.curve_points(t, fft), 10, true);
         if (update) {
             this._tubes[this._current] = babylonjs__WEBPACK_IMPORTED_MODULE_0__["MeshBuilder"].CreateTube("mesh", { path: cat.getPoints(), radius: 0.01,
                 instance: this._tubes[this._current % this._n] });
@@ -219,17 +234,32 @@ var Danse2 = /** @class */ (function () {
                     parti.particleTexture = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Texture"]("textures/Flare.png", this._scene);
                     parti.minSize = 0.02;
                     //parti.maxSize = 0.1
+                    //parti.color1 = new BABYLON.Color4(0.7, 0.8, 1.0, 1.0);
+                    parti.color1 = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Color4"].FromColor3(this._c, 0.5);
+                    parti.color2 = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Color4"](0.2, 0.5, 1.0, 1.0);
+                    parti.colorDead = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Color4"](0, 0, 0.2, 0.0);
+                    // Noise
+                    var noiseTexture = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["NoiseProceduralTexture"]("perlin", 256, this._scene);
+                    noiseTexture.animationSpeedFactor = 2;
+                    noiseTexture.persistence = 0.1; //2
+                    noiseTexture.brightness = 0.5;
+                    noiseTexture.octaves = 1;
+                    parti.noiseTexture = noiseTexture;
+                    parti.noiseStrength = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](10, 10, 10);
+                    parti.minEmitPower = 1;
+                    parti.maxEmitPower = 3;
+                    parti.updateSpeed = 0.003;
                     parti.start();
                     this._partis.push(parti);
                 }
             }
-            var cat_1 = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Curve3"].CreateCatmullRomSpline(this.curve_points(t), 10, false);
+            var cat_1 = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Curve3"].CreateCatmullRomSpline(this.curve_points(t, fft), 10, false);
             var path3d = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Path3D"](cat_1.getPoints());
             for (var i = 0; i < fft.length; i++) {
                 var p = path3d.getPointAt(i / fft.length);
                 this._balls[i].position = p;
                 // make higher frequencies more visuable
-                this._partis[i].emitRate = fft[i] * 3 * i;
+                this._partis[i].emitRate = fft[i] * 5 * i;
                 this._partis[i].maxSize = fft[i] * 0.1;
             }
         }
@@ -329,9 +359,13 @@ var MyScene = /** @class */ (function () {
     }
     MyScene.prototype.createScene = function () {
         this._scene = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Scene"](this._engine);
-        this._scene.clearColor = babylonjs__WEBPACK_IMPORTED_MODULE_0__["Color4"].FromColor3(babylonjs__WEBPACK_IMPORTED_MODULE_0__["Color3"].Random());
-        this._camera = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["ArcRotateCamera"]("camera1", 0, 0, 0, new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](0, 1, -0), this._scene);
-        this._camera.setPosition(new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](0, 0, -6));
+        //let gravityVector = new BABYLON.Vector3(0,-9.81,0)
+        //let physicsPlugin = new BABYLON.CannonJSPlugin()
+        //this._scene.enablePhysics(gravityVector, physicsPlugin)
+        //this._scene.clearColor = BABYLON.Color4.FromColor3(BABYLON.Color3.Random())
+        this._scene.clearColor = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Color4"](0.25, 0.25, Math.random() * 0.25 + 0.25, 1.0);
+        this._camera = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["ArcRotateCamera"]("camera1", 0, 0, 0, new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](-0.5, 2.25, 0.5), this._scene);
+        this._camera.setPosition(new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](0, 0, -3));
         this._camera.attachControl(this._canvas, true);
         // Create a basic light, aiming 0,1,0 - meaning, to the sky.
         this._light = new babylonjs__WEBPACK_IMPORTED_MODULE_0__["HemisphericLight"]('light1', new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector3"](0, 1, 0), this._scene);

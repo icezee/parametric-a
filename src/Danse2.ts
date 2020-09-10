@@ -12,7 +12,7 @@ export default class Danse2 {
 
     private _current: number = 0
     private _n: number = 20
-    private _c: BABYLON.Color3 = BABYLON.Color3.Random()
+    private _c: BABYLON.Color3 = new BABYLON.Color3(0.3+Math.random()*0.5,0.3+Math.random()*0.5,0.3+Math.random()*0.5)
 
     constructor(scene: BABYLON.Scene) {
         this._scene = scene
@@ -26,15 +26,28 @@ export default class Danse2 {
         this._partis = []
     }
 
-    curve_points(t: number): BABYLON.Vector3[] {
+    curve_points(t: number, fft: number[]): BABYLON.Vector3[] {
         // create 5 points for Catmull Rom curve
         // each point rotate at different speed
         // the shape of the curve is determined by t
-        const r1 = 1.0 * Math.cos(t)
-        const r2 = 0.5
-        const r3 = 1.2 * Math.sin(t) - 0.6
-        const r4 = 0.5
-        const r5 = 0.8 * Math.cos(t) -0.4
+
+        // use fft as the radii
+        // divide fft array into 6 sections, throw the highest away, as there is hardly sound there
+        let rs = []
+        for(let i=0;i<6;i++) {
+            rs[i] = 0
+            if(fft) {
+                for(let j=0;j<fft.length/6;j++) {
+                    rs[i] += fft[j]
+                }
+                rs[i] *= 0.05
+            }
+        }
+        const r1 = rs[0] * Math.cos(t)
+        const r2 = rs[1]
+        const r3 = rs[2] * Math.sin(t) - rs[2]*0.6
+        const r4 = rs[3]
+        const r5 = rs[4] * Math.cos(t) - rs[4]*0.4
 
         let a1 = t * 0.5
         let a2 = t * 2.0
@@ -54,7 +67,10 @@ export default class Danse2 {
 
     update(dt: number, fft: number[]) {
         // update according to dt: time delta, i.e., the time has passed
-        this._t += dt * 0.0012
+        this._t += dt * 0.00052 
+        if(fft) {
+            this._t += fft[10] * 0.01
+        }
 
         this.make_tube(this._t, true, fft)
 
@@ -62,7 +78,7 @@ export default class Danse2 {
 
     make_tube(t: number, update: boolean, fft?: number[] ) {
         let cat = BABYLON.Curve3.CreateCatmullRomSpline(
-            this.curve_points(t),10,true)
+            this.curve_points(t, fft),10,true)
         if(update) {
             this._tubes[this._current] = BABYLON.MeshBuilder.CreateTube("mesh",
             {path:cat.getPoints(),radius:0.01,
@@ -89,6 +105,27 @@ export default class Danse2 {
                     parti.particleTexture = new BABYLON.Texture("textures/Flare.png", this._scene)
                     parti.minSize = 0.02
                     //parti.maxSize = 0.1
+
+                    //parti.color1 = new BABYLON.Color4(0.7, 0.8, 1.0, 1.0);
+                    parti.color1 = BABYLON.Color4.FromColor3(this._c, 0.5)
+                    parti.color2 = new BABYLON.Color4(0.2, 0.5, 1.0, 1.0);
+                    parti.colorDead = new BABYLON.Color4(0, 0, 0.2, 0.0);
+
+
+                    // Noise
+                    var noiseTexture = new BABYLON.NoiseProceduralTexture("perlin", 256, this._scene);
+                    noiseTexture.animationSpeedFactor = 2;
+                    noiseTexture.persistence = 0.1;//2
+                    noiseTexture.brightness = 0.5;
+                    noiseTexture.octaves = 1;
+
+                    parti.noiseTexture = noiseTexture;
+                    parti.noiseStrength = new BABYLON.Vector3(10, 10, 10);
+
+                    parti.minEmitPower = 1;
+                    parti.maxEmitPower = 3;
+                    parti.updateSpeed = 0.003;
+
                     parti.start()
 
                     this._partis.push(parti)
@@ -96,7 +133,7 @@ export default class Danse2 {
             }
 
             let cat = BABYLON.Curve3.CreateCatmullRomSpline(
-                this.curve_points(t),10,false)
+                this.curve_points(t, fft),10,false)
             let path3d = new BABYLON.Path3D(cat.getPoints())
 
             for(let i=0; i<fft.length; i++) {
@@ -104,7 +141,7 @@ export default class Danse2 {
                 this._balls[i].position = p
 
                 // make higher frequencies more visuable
-                this._partis[i].emitRate = fft[i] * 3 * i
+                this._partis[i].emitRate = fft[i] * 5 * i
                 this._partis[i].maxSize = fft[i] * 0.1 
 
             }

@@ -1,4 +1,4 @@
-# Audioactive (visualize sound)
+# Musical-Impulse
 following the previous exercises, make it sound responsive
 
 this is a technical exercise, 

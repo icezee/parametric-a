@@ -20,10 +20,16 @@ export default class MyScene {
 
     createScene() : void {
         this._scene = new BABYLON.Scene(this._engine);
-        this._scene.clearColor = BABYLON.Color4.FromColor3(BABYLON.Color3.Random())
 
-        this._camera = new BABYLON.ArcRotateCamera("camera1", 0, 0, 0, new BABYLON.Vector3(0, 1, -0), this._scene);
-        this._camera.setPosition(new BABYLON.Vector3(0, 0, -6));
+        //let gravityVector = new BABYLON.Vector3(0,-9.81,0)
+        //let physicsPlugin = new BABYLON.CannonJSPlugin()
+        //this._scene.enablePhysics(gravityVector, physicsPlugin)
+
+        //this._scene.clearColor = BABYLON.Color4.FromColor3(BABYLON.Color3.Random())
+        this._scene.clearColor = new BABYLON.Color4(0.25,0.25,Math.random()*0.25+0.25,1.0)
+
+        this._camera = new BABYLON.ArcRotateCamera("camera1", 0, 0, 0, new BABYLON.Vector3(-0.5, 2.25, 0.5), this._scene);
+        this._camera.setPosition(new BABYLON.Vector3(0, 0, -3));
         this._camera.attachControl(this._canvas, true);
 
         // Create a basic light, aiming 0,1,0 - meaning, to the sky.

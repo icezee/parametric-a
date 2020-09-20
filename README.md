@@ -1,7 +1,4 @@
-# Musical-Impulse
-following the previous exercises, make it sound responsive
-
-this is a technical exercise, 
-the result is somewhat interesting, but far less ideal for a music visualization
+# parametric-a
+parametric design experiments
 
 read more on medium @reddotblues
